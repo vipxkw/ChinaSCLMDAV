@@ -169,6 +169,7 @@ const Icon = {
   eyeOff: I('<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><path d="m3 3 18 18"/><path d="M10.5 10.5a2 2 0 0 0 2.8 2.8"/>'),
   link: I('<path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1-1"/>'),
   zap: I('<path d="M13 2 3 14h7l-1 8 10-12h-7z"/>'),
+  github: I('<path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.3 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/>'),
 };
 
 const LOGO = `
@@ -846,7 +847,7 @@ async function renderSettings() {
       <div class="field"><label>隐藏路径（glob，逗号分隔）</label><input id="st-ignore" class="input" /></div>
       <button id="st-save-srv" class="btn-primary !py-2.5">保存配置</button>
     </section>
-    <section class="card p-5"><div class="flex items-center gap-3"><div class="w-10 h-10">${LOGO}</div><div><div class="font-bold">${esc(BRAND_NAME)}</div><div class="text-[12px] mt-0.5" style="color:var(--text-3)">v1.1.0 · Go + Tailwind · 网盘服务器</div></div></div></section>
+    <section class="card p-5"><div class="flex items-center gap-3"><div class="w-10 h-10">${LOGO}</div><div><div class="font-bold">${esc(BRAND_NAME)}</div><div class="text-[12px] mt-0.5" style="color:var(--text-3)">v1.1.0 · Go + Tailwind · 网盘服务器</div><a href="https://github.com/vipxkw/ChinaSCLMDAV" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-[12px] mt-0.5" style="color:var(--brand)">${Icon.github.replace('class="','class="w-4 h-4 ')} github.com/vipxkw/ChinaSCLMDAV</a></div></div></section>
   </div>`);
 
   const u = state.user;

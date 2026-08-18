@@ -1,0 +1,21 @@
+services:
+  chinasclmdav:
+    image: chinasclmdav:latest
+    build:
+      context: .
+    container_name: chinasclmdav
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # Seed account (only used on first run with an empty database).
+      - CHINASCLMDAV_SEED_USER=vipiu
+      - CHINASCLMDAV_SEED_EMAIL=vipiu@qq.com
+      - CHINASCLMDAV_SEED_NAME=DAV
+      - CHINASCLMDAV_SEED_PASS=ants666@@@
+      - CHINASCLMDAV_PUBLIC_URL=http://localhost:8080
+    volumes:
+      - chinasclmdav-data:/data
+
+volumes:
+  chinasclmdav-data:

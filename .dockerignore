@@ -1,0 +1,22 @@
+# Build / local
+chinasclmdav.exe
+*.exe
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+cookiejar.txt
+*.json
+!go.mod
+!go.sum
+
+# Git
+.git/
+.gitignore
+
+# Editors / OS
+.idea/
+.vscode/
+*.swp
+Thumbs.db

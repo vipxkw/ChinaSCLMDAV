@@ -817,7 +817,7 @@ async function renderUsers() {
           if (copy) {
             const pw = pwMap[copy.dataset.id];
             if (!pw) { toast('该应用密码未保存明文，无法复制，请删除后重新生成','error'); return; }
-            navigator.clipboard.writeText(pw).then(() => toast('已复制秘钥','ok')); return;
+            copyText(pw, '已复制秘钥'); return;
           }
           if (d) {
             if (await iConfirm('撤销授权','撤销此应用密码后，该客户端将无法连接。','撤销',true)) {

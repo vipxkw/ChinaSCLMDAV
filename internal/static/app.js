@@ -609,7 +609,7 @@ function renderFileList(entries, dir) {
     else if (dl) { window.location.href = '/api/download?path='+encodeURIComponent(path); }
     else if (sh) { shareFile(path); }
     else if (more) { fileActions(path); }
-  });
+  };
 }
 
 function fileActions(path) {

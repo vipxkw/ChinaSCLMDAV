@@ -350,7 +350,15 @@ function mobileTabBar() {
 }
 
 function appShell(body) {
-  return `<div class="lg:flex min-h-screen">${desktopNav()}<div class="flex-1 min-w-0"><main class="min-h-screen pb-24 lg:pb-10">${body}</main></div>${mobileTabBar()}</div>`;
+  return `<div class="lg:flex min-h-screen">${desktopNav()}<div class="flex-1 min-w-0"><main class="min-h-screen pb-24 lg:pb-10">${body}
+    <footer class="px-5 md:px-8 pt-2 pb-6">
+      <div class="rounded-xl flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-3" style="border:1px solid var(--line);background:var(--bg-soft)">
+        <span class="text-[13px] font-semibold" style="color:var(--text-2)">${esc(BRAND_NAME)} · v1.1.0</span>
+        <span class="text-[12px]" style="color:var(--text-3)">Go + Tailwind · 网盘服务器</span>
+        <a href="https://github.com/vipxkw/ChinaSCLMDAV" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-[12px] font-medium" style="color:var(--brand)">${Icon.github.replace('class="','class="w-4 h-4 ')} github.com/vipxkw/ChinaSCLMDAV</a>
+      </div>
+    </footer>
+  </main></div>${mobileTabBar()}</div>`;
 }
 
 const SPINNER = `<div class="flex justify-center py-16"><svg class="w-7 h-7 animate-spin" style="color:var(--text-3)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4h-4"/></svg></div>`;
@@ -845,27 +853,48 @@ function showAppPassword(name, pwd) {
 }
 
 /* settings */
+const SETTINGS_TABS = [
+  { key: 'profile', label: '个人资料' },
+  { key: 'totp',    label: '两步验证' },
+  { key: 'appearance', label: '外观' },
+  { key: 'server',  label: '服务器配置' },
+];
+
 async function renderSettings() {
   const app = document.getElementById('app');
-  app.innerHTML = appShell(topBar('设置','','') + `<div class="px-5 md:px-8 py-6 space-y-5">
-    <section class="card p-5 space-y-3"><div class="sec-title" style="margin-bottom:.6rem">个人资料</div>
-      <div class="field"><label>显示名称</label><input id="st-name" class="input" /></div>
-      <div class="field"><label>邮箱</label><input id="st-email" class="input" /></div>
-      <button id="st-save-profile" class="btn-primary !py-2.5">保存资料</button>
-    </section>
-    <section class="card p-5 space-y-3"><div class="sec-title" style="margin-bottom:.6rem">修改密码</div>
-      <div class="field"><label>当前密码</label><input id="st-old" class="input" type="password" /></div>
-      <div class="field"><label>新密码</label><input id="st-new" class="input" type="password" /></div>
-      <button id="st-save-pass" class="btn-primary !py-2.5">更新密码</button>
-    </section>
-    <section class="card p-5 space-y-3"><div class="flex items-center justify-between"><span class="font-semibold" style="font-size:.95rem">两步验证 (TOTP)</span><span id="totp-state" class="chip"></span></div><div id="totp-actions"></div></section>
-    <section class="card p-5 space-y-3"><div class="sec-title" style="margin-bottom:.6rem">外观</div><div class="flex items-center justify-between"><div><div class="text-[14px] font-semibold">深色模式</div><div class="text-[12px]" style="color:var(--text-3)">切换浅色 / 深色外观</div></div><button id="toggle-dark" class="btn-ghost hairline">${Icon.theme.replace('class="','class="w-5 h-5 ')} 切换</button></div></section>
-    <section class="card p-5 space-y-3"><div class="sec-title" style="margin-bottom:.6rem">服务器配置</div>
-      <div class="field"><label>隐藏路径（glob，逗号分隔）</label><input id="st-ignore" class="input" /></div>
-      <button id="st-save-srv" class="btn-primary !py-2.5">保存配置</button>
-    </section>
-    <section class="card p-5"><div class="flex items-center gap-3"><div class="w-10 h-10">${LOGO}</div><div><div class="font-bold">${esc(BRAND_NAME)}</div><div class="text-[12px] mt-0.5" style="color:var(--text-3)">v1.1.0 · Go + Tailwind · 网盘服务器</div><a href="https://github.com/vipxkw/ChinaSCLMDAV" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-[12px] mt-0.5" style="color:var(--brand)">${Icon.github.replace('class="','class="w-4 h-4 ')} github.com/vipxkw/ChinaSCLMDAV</a></div></div></section>
+  app.innerHTML = appShell(topBar('设置','','') + `<div class="px-5 md:px-8 py-6">
+    <div id="st-tabs" class="flex gap-2 mb-5 overflow-x-auto"></div>
+    <div class="space-y-5">
+      <section id="st-pane-profile" class="card p-5 space-y-3" data-pane="profile">
+        <div class="sec-title" style="margin-bottom:.6rem">个人资料</div>
+        <div class="field"><label>显示名称</label><input id="st-name" class="input" /></div>
+        <div class="field"><label>邮箱</label><input id="st-email" class="input" /></div>
+        <button id="st-save-profile" class="btn-primary !py-2.5">保存资料</button>
+      </section>
+      <section id="st-pane-password" class="card p-5 space-y-3" data-pane="profile">
+        <div class="sec-title" style="margin-bottom:.6rem">修改密码</div>
+        <div class="field"><label>当前密码</label><input id="st-old" class="input" type="password" /></div>
+        <div class="field"><label>新密码</label><input id="st-new" class="input" type="password" /></div>
+        <button id="st-save-pass" class="btn-primary !py-2.5">更新密码</button>
+      </section>
+      <section id="st-pane-totp" class="card p-5 space-y-3" data-pane="totp"><div class="flex items-center justify-between"><span class="font-semibold" style="font-size:.95rem">两步验证 (TOTP)</span><span id="totp-state" class="chip"></span></div><div id="totp-actions"></div></section>
+      <section id="st-pane-appearance" class="card p-5 space-y-3" data-pane="appearance"><div class="sec-title" style="margin-bottom:.6rem">外观</div><div class="flex items-center justify-between"><div><div class="text-[14px] font-semibold">深色模式</div><div class="text-[12px]" style="color:var(--text-3)">切换浅色 / 深色外观</div></div><button id="toggle-dark" class="btn-ghost hairline">${Icon.theme.replace('class="','class="w-5 h-5 ')} 切换</button></div></section>
+      <section id="st-pane-server" class="card p-5 space-y-3" data-pane="server"><div class="sec-title" style="margin-bottom:.6rem">服务器配置</div>
+        <div class="field"><label>隐藏路径（glob，逗号分隔）</label><input id="st-ignore" class="input" /></div>
+        <button id="st-save-srv" class="btn-primary !py-2.5">保存配置</button>
+      </section>
+    </div>
   </div>`);
+
+  document.getElementById('st-tabs').innerHTML = SETTINGS_TABS.map(t => `<button data-tab="${t.key}" class="audit-tab">${esc(t.label)}</button>`).join('');
+  const _stTab = { current: 'profile' };
+  function switchTab(key) {
+    _stTab.current = key;
+    document.getElementById('st-tabs').innerHTML = SETTINGS_TABS.map(t => `<button data-tab="${t.key}" class="audit-tab ${key===t.key?'on':''}">${esc(t.label)}</button>`).join('');
+    document.querySelectorAll('[data-pane]').forEach(p => { const on = p.dataset.pane === key; p.style.display = on ? '' : 'none'; });
+  }
+  switchTab('profile');
+  document.getElementById('st-tabs').onclick = e => { const t = e.target.closest('[data-tab]'); if (t) switchTab(t.dataset.tab); };
 
   const u = state.user;
   document.getElementById('st-name').value = u.display_name||'';
@@ -1008,7 +1037,7 @@ async function renderAudit() {
       const meta = AUDIT_META[cat] || AUDIT_META.system;
       return `<div class="file-row fade-in">
         <div class="ficon" style="background:${meta.c}1a">${meta.e}</div>
-        <div class="flex-1 min-w-0"><div class="text-[14px] font-semibold truncate">${esc(AUDIT_LABELS[a.action] || a.action)}<span class="chip" style="margin-left:.5rem;background:${meta.c}14;color:${meta.c}">${esc(catLabel(cat))}</span></div>${a.detail ? `<div class="text-[12px] mt-0.5 truncate" style="color:var(--text-3)">${esc(a.detail)}</div>` : ''}</div>
+        <div class="flex-1 min-w-0"><div class="flex items-center gap-2 truncate"><span class="text-[14px] font-semibold truncate">${esc(AUDIT_LABELS[a.action] || a.action)}</span><span class="chip shrink-0" style="background:${meta.c}14;color:${meta.c}">${esc(catLabel(cat))}</span>${a.detail ? `<span class="text-[12px] truncate" style="color:var(--text-3)">${esc(a.detail)}</span>` : ''}</div></div>
         <div class="text-[11px] shrink-0" style="color:var(--text-3)">${fmtDateTime(a.created_at)}</div>
         <button data-del data-id="${a.id}" class="icon-btn danger" style="width:2.3rem;height:2.3rem" title="删除记录">${Icon.trash.replace('class="','class="w-4 h-4 ')}</button>
       </div>`;

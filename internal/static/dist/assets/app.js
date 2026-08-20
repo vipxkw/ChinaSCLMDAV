@@ -526,10 +526,10 @@ async function renderFiles() {
     <div id="files-body" class="space-y-2">${SPINNER}</div>
   </div>`);
 
-  app.addEventListener('click', e => {
+  app.onclick = e => {
     const j = e.target.closest('[data-jump]');
     if (j) { e.preventDefault(); state.dir = j.dataset.jump; state.search = ''; route(); }
-  });
+  };
 
   document.getElementById('file-search').addEventListener('keydown', e => {
     if (e.key === 'Enter') { state.search = e.target.value.trim(); loadFiles(); }
@@ -594,7 +594,7 @@ function renderFileList(entries, dir) {
     </div>`;
   }).join('') + '</div>';
 
-  body.addEventListener('click', async (e) => {
+  body.onclick = async (e) => {
     const row = e.target.closest('.file-row');
     if (!row) return;
     const path = row.dataset.path;

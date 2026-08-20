@@ -89,6 +89,26 @@ async function api(path, opts) {
 }
 
 /* ---------------- toast & confirm ---------------- */
+function copyText(text, okMsg, errMsg) {
+  const done = () => toast(okMsg || '已复制', 'ok');
+  const fail = () => toast(errMsg || '复制失败', 'error');
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text) ? done() : fail());
+  }
+  return fallbackCopy(text) ? done() : fail();
+}
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+  ta.remove();
+  return ok;
+}
+
 function toast(msg, type) {
   let box = document.getElementById('toast-wrap');
   if (!box) {
@@ -817,13 +837,10 @@ function showAppPassword(name, pwd) {
   openSheet(`<div class="space-y-4 mt-1">
     <p class="text-[13px]" style="color:var(--text-2)">应用 <span class="font-semibold" style="color:var(--text)">${esc(name)}</span> 的应用密码已生成：</p>
     <div class="flex items-center gap-2"><code class="input !bg-transparent text-center font-mono !tracking-widest" id="ap-show" style="color:var(--text)">${esc(pwd)}</code><button id="ap-copy" class="icon-btn grad-icon shrink-0" style="border-radius:.85rem;width:2.7rem;height:2.7rem"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button></div>
-    <div class="flex gap-3"><button id="ap-eye" class="btn-ghost flex-1 hairline"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg> 显示 / 隐藏</button><button id="ap-done" class="flex-1 inline-flex items-center justify-center py-3 px-4 rounded-xl font-semibold text-white" style="background:linear-gradient(135deg,var(--brand),var(--brand-2))">完成</button></div>
+    <button id="ap-done" class="w-full inline-flex items-center justify-center py-3 px-4 rounded-xl font-semibold text-white" style="background:linear-gradient(135deg,var(--brand),var(--brand-2))">完成</button>
     <p class="text-[12px] text-center" style="color:var(--danger)">请妥善保存，此密码仅显示一次</p>
   </div>`, '应用密码已生成');
-  const show = document.getElementById('ap-show');
-  let hidden = false;
-  document.getElementById('ap-eye').onclick = () => { hidden = !hidden; show.style.opacity = hidden ? '0.25' : '1'; };
-  document.getElementById('ap-copy').onclick = () => navigator.clipboard.writeText(pwd).then(() => toast('已复制','ok'));
+  document.getElementById('ap-copy').onclick = () => copyText(pwd, '已复制','复制失败');
   document.getElementById('ap-done').onclick = () => { closeAll(); renderUsers(); };
 }
 

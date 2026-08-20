@@ -40,24 +40,36 @@ IMAGE=your-registry/chinasclmdav:v1.0 ./build.sh
 PUSH=0 PLATFORMS=linux/arm64 IMAGE=chinasclmdav:latest ./build.sh
 ```
 
-## Docker Compose 部署
+## Docker 部署
+
+直接运行官方镜像：
+
+```bash
+docker run -d --name chinasclmdav -p 8080:8080 \
+  -v chinasclmdav-data:/data \
+  vipiu/chinasclmdav:latest
+```
+
+默认种子账号 **admin / admin123**，登录后到「系统设置」修改密码即可（只内置默认值，账号数据保存在 `/data`，不开放未授权登录）。
+
+或使用 Docker Compose：
 
 ```bash
 docker compose up -d --build
 ```
 
 默认端口 `8080`，数据（用户文件 + SQLite）保存在 volume `chinasclmdav-data:/data`。
-首次启动会以环境变量创建种子账号：
+首次启动若需自定义种子账号，可用环境变量覆盖：
 
 | 环境变量 | 说明 | 默认 |
 | --- | --- | --- |
 | `CHINASCLMDAV_LISTEN` | 监听地址 | `:8080` |
 | `CHINASCLMDAV_DATA` | 数据目录 | `/data` |
 | `CHINASCLMDAV_PUBLIC_URL` | 对外基础地址（WebDAV 提示用） | `http://localhost:8080` |
-| `CHINASCLMDAV_SEED_USER` | 种子账号用户名 | `xxxx` |
-| `CHINASCLMDAV_SEED_EMAIL` | 种子账号邮箱 | `xxxx@qq.com` |
-| `CHINASCLMDAV_SEED_NAME` | 种子账号显示名 | `DAV` |
-| `CHINASCLMDAV_SEED_PASS` | 种子账号密码（首次运行必填） | — |
+| `CHINASCLMDAV_SEED_USER` | 种子账号用户名 | `admin` |
+| `CHINASCLMDAV_SEED_EMAIL` | 种子账号邮箱 | `admin@qq.com` |
+| `CHINASCLMDAV_SEED_NAME` | 种子账号显示名 | `admin` |
+| `CHINASCLMDAV_SEED_PASS` | 种子账号密码（默认内置 `admin123`） | `admin123` |
 
 ## 使用 WebDAV 客户端
 

@@ -83,7 +83,7 @@ async function api(path, opts) {
   if (ct.includes('application/json')) { try { data = await res.json(); } catch(e){} }
   if (!res.ok) {
     const err = new Error((data && data.error) || ('请求失败 ('+res.status+')'));
-    err.status = res.status; throw err;
+    err.status = res.status; err.data = data; throw err;
   }
   return data;
 }
@@ -351,7 +351,7 @@ function mobileTabBar() {
 
 function appShell(body) {
   return `<div class="lg:flex min-h-screen">${desktopNav()}<div class="flex-1 min-w-0 flex flex-col min-h-screen"><main class="flex-1 pb-24 lg:pb-8">${body}</main>
-    <footer class="px-5 md:px-8 pb-24 lg:pb-6">
+    <footer class="px-5 md:px-8 pb-6">
       <div class="rounded-xl flex items-center justify-center gap-x-3 gap-y-1 px-4 py-3" style="border:1px solid var(--line);background:var(--bg-soft)">
         <a href="https://github.com/vipxkw/ChinaSCLMDAV" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-[13px] font-semibold" style="color:var(--brand)">${Icon.github.replace('class="','class="w-4 h-4 ')} ${esc(BRAND_NAME)} · v1.1.0</a>
         <span class="w-px h-4 shrink-0" style="background:var(--line)"></span>
@@ -423,18 +423,17 @@ async function renderLogin() {
     const errEl = document.getElementById('lg-err'); errEl.classList.add('hidden');
     try {
       const data = await api('/login', { method:'POST', body:{ username: document.getElementById('lg-user').value.trim(), password: document.getElementById('lg-pass').value, totp_code: document.getElementById('lg-totp').value.trim()||undefined }});
-      if (data.totp_enabled === false && data.totp_forced) {
-        errEl.textContent = '账号已启用两步验证，请输入验证码';
-        errEl.classList.remove('hidden');
-        document.getElementById('totp-row').classList.remove('hidden');
-        btn.disabled = false; loader.classList.add('hidden'); label.textContent = '登录';
-        return;
-      }
       localStorage.setItem('cscd_user', document.getElementById('lg-user').value.trim());
       state.user = data;
       toast('登录成功','ok');
       location.hash = '#/home';
-    } catch(err) { errEl.textContent = err.message; errEl.classList.remove('hidden'); }
+    } catch(err) {
+      errEl.textContent = err.message; errEl.classList.remove('hidden');
+      if (err.data && err.data.totp_required) {
+        document.getElementById('totp-row').classList.remove('hidden');
+        document.getElementById('lg-totp').focus();
+      }
+    }
     btn.disabled = false; loader.classList.add('hidden'); label.textContent = '登录';
   });
 }
@@ -870,7 +869,8 @@ async function renderSettings() {
         <div class="field"><label>用户名（显示名称）</label><input id="st-name" class="input" /></div>
         <div class="field"><label>邮箱</label><input id="st-email" class="input" /></div>
         <button id="st-save-profile" class="btn-primary !py-2.5">保存资料</button>
-        <div class="divider" style="height:1px;background:var(--line);margin:.4rem 0"></div>
+      </section>
+      <section id="st-pane-password" class="card p-5 space-y-3" data-pane="profile">
         <div class="sec-title" style="margin-bottom:.6rem">修改密码</div>
         <div class="field"><label>当前密码</label><input id="st-old" class="input" type="password" autocomplete="current-password" /></div>
         <div class="field"><label>新密码</label><input id="st-new" class="input" type="password" autocomplete="new-password" /></div>
@@ -939,7 +939,7 @@ function renderTotpSection() {
           <div class="field"><label>2. 输入验证器生成的 6 位验证码</label><input id="t-code" class="input text-center tracking-[0.4em]" inputmode="numeric" maxlength="6" placeholder="000000" /></div>
           <button id="t-ok" class="btn-primary w-full !py-3">启用</button>
         </div>`, '启用两步验证');
-        document.getElementById('t-copy').onclick = () => navigator.clipboard.writeText(r.secret).then(()=>toast('已复制','ok'));
+        document.getElementById('t-copy').onclick = () => copyText(r.secret);
         document.getElementById('t-ok').onclick = async () => {
           try { await api('/totp/enable',{method:'POST',body:{code:document.getElementById('t-code').value.trim()}}); s.remove(); state.user.totp_enabled = true; toast('已启用两步验证','ok'); renderTotpSection(); } catch(e) { toast(e.message,'error'); }
         };

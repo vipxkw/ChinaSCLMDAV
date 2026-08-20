@@ -38,7 +38,9 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	if user.TotpEnabled {
 		if req.TotpCode == "" {
-			s.fail(w, http.StatusUnauthorized, "需要两步验证码")
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]interface{}{"error": "需要两步验证码", "totp_required": true})
 			return
 		}
 		if !auth.VerifyTOTP(user.TotpSecret, req.TotpCode, time.Now()) {

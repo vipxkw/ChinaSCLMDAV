@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"chinasclmdav/internal/auth"
@@ -114,7 +115,18 @@ func (s *Server) handleUpdateProfile(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, http.StatusBadRequest, "无效请求")
 		return
 	}
-	if err := s.Store.UpdateUser(u.ID, body.DisplayName, body.Email); err != nil {
+	body.DisplayName = strings.TrimSpace(body.DisplayName)
+	body.Email = strings.TrimSpace(body.Email)
+	if body.DisplayName == "" {
+		s.fail(w, http.StatusBadRequest, "显示名称不能为空")
+		return
+	}
+	// 显示名称即用户名；检查除自己外是否已存在同名用户
+	if other, err := s.Store.GetUserByUsernameOrEmail(body.DisplayName); err == nil && other.ID != u.ID {
+		s.fail(w, http.StatusBadRequest, "该用户名已存在")
+		return
+	}
+	if err := s.Store.UpdateUser(u.ID, body.DisplayName, body.DisplayName, body.Email); err != nil {
 		s.fail(w, http.StatusInternalServerError, "更新失败")
 		return
 	}

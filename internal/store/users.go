@@ -55,9 +55,9 @@ func (s *Store) GetUser(id int64) (*User, error) {
 	return u, err
 }
 
-// UpdateUser updates display name and email.
-func (s *Store) UpdateUser(id int64, displayName, email string) error {
-	_, err := s.db.Exec(`UPDATE users SET display_name = ?, email = ? WHERE id = ?`, displayName, email, id)
+// UpdateUser updates username, display name and email.
+func (s *Store) UpdateUser(id int64, username, displayName, email string) error {
+	_, err := s.db.Exec(`UPDATE users SET username = ?, display_name = ?, email = ? WHERE id = ?`, username, displayName, email, id)
 	return err
 }
 

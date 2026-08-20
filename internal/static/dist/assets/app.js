@@ -350,15 +350,15 @@ function mobileTabBar() {
 }
 
 function appShell(body) {
-  return `<div class="lg:flex min-h-screen">${desktopNav()}<div class="flex-1 min-w-0"><main class="min-h-screen pb-24 lg:pb-10">${body}
-    <footer class="px-5 md:px-8 pt-2 pb-6">
-      <div class="rounded-xl flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-3" style="border:1px solid var(--line);background:var(--bg-soft)">
-        <span class="text-[13px] font-semibold" style="color:var(--text-2)">${esc(BRAND_NAME)} · v1.1.0</span>
+  return `<div class="lg:flex min-h-screen">${desktopNav()}<div class="flex-1 min-w-0 flex flex-col min-h-screen"><main class="flex-1 pb-24 lg:pb-8">${body}</main>
+    <footer class="px-5 md:px-8 pb-24 lg:pb-6">
+      <div class="rounded-xl flex items-center justify-center gap-x-3 gap-y-1 px-4 py-3" style="border:1px solid var(--line);background:var(--bg-soft)">
+        <a href="https://github.com/vipxkw/ChinaSCLMDAV" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-[13px] font-semibold" style="color:var(--brand)">${Icon.github.replace('class="','class="w-4 h-4 ')} ${esc(BRAND_NAME)} · v1.1.0</a>
+        <span class="w-px h-4 shrink-0" style="background:var(--line)"></span>
         <span class="text-[12px]" style="color:var(--text-3)">Go + Tailwind · 网盘服务器</span>
-        <a href="https://github.com/vipxkw/ChinaSCLMDAV" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-[12px] font-medium" style="color:var(--brand)">${Icon.github.replace('class="','class="w-4 h-4 ')} github.com/vipxkw/ChinaSCLMDAV</a>
       </div>
     </footer>
-  </main></div>${mobileTabBar()}</div>`;
+  </div></div>${mobileTabBar()}</div>`;
 }
 
 const SPINNER = `<div class="flex justify-center py-16"><svg class="w-7 h-7 animate-spin" style="color:var(--text-3)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4h-4"/></svg></div>`;
@@ -867,14 +867,14 @@ async function renderSettings() {
     <div class="space-y-5">
       <section id="st-pane-profile" class="card p-5 space-y-3" data-pane="profile">
         <div class="sec-title" style="margin-bottom:.6rem">个人资料</div>
-        <div class="field"><label>显示名称</label><input id="st-name" class="input" /></div>
+        <div class="field"><label>用户名（显示名称）</label><input id="st-name" class="input" /></div>
         <div class="field"><label>邮箱</label><input id="st-email" class="input" /></div>
         <button id="st-save-profile" class="btn-primary !py-2.5">保存资料</button>
-      </section>
-      <section id="st-pane-password" class="card p-5 space-y-3" data-pane="profile">
+        <div class="divider" style="height:1px;background:var(--line);margin:.4rem 0"></div>
         <div class="sec-title" style="margin-bottom:.6rem">修改密码</div>
-        <div class="field"><label>当前密码</label><input id="st-old" class="input" type="password" /></div>
-        <div class="field"><label>新密码</label><input id="st-new" class="input" type="password" /></div>
+        <div class="field"><label>当前密码</label><input id="st-old" class="input" type="password" autocomplete="current-password" /></div>
+        <div class="field"><label>新密码</label><input id="st-new" class="input" type="password" autocomplete="new-password" /></div>
+        <div class="field"><label>重复新密码</label><input id="st-new2" class="input" type="password" autocomplete="new-password" /></div>
         <button id="st-save-pass" class="btn-primary !py-2.5">更新密码</button>
       </section>
       <section id="st-pane-totp" class="card p-5 space-y-3" data-pane="totp"><div class="flex items-center justify-between"><span class="font-semibold" style="font-size:.95rem">两步验证 (TOTP)</span><span id="totp-state" class="chip"></span></div><div id="totp-actions"></div></section>
@@ -900,10 +900,17 @@ async function renderSettings() {
   document.getElementById('st-name').value = u.display_name||'';
   document.getElementById('st-email').value = u.email||'';
   document.getElementById('st-save-profile').onclick = async () => {
-    try { await api('/profile',{method:'POST',body:{display_name:document.getElementById('st-name').value.trim(),email:document.getElementById('st-email').value.trim()}}); toast('已保存','ok'); state.user.display_name = document.getElementById('st-name').value.trim(); state.user.email = document.getElementById('st-email').value.trim(); } catch(e) { toast(e.message,'error'); }
+    const name = document.getElementById('st-name').value.trim();
+    const email = document.getElementById('st-email').value.trim();
+    try { await api('/profile',{method:'POST',body:{display_name:name,email}}); toast('已保存','ok'); state.user.display_name = name; state.user.username = name; state.user.email = email; } catch(e) { toast(e.message,'error'); }
   };
   document.getElementById('st-save-pass').onclick = async () => {
-    try { await api('/password',{method:'POST',body:{old_password:document.getElementById('st-old').value,new_password:document.getElementById('st-new').value}}); document.getElementById('st-old').value=''; document.getElementById('st-new').value=''; toast('密码已更新','ok'); } catch(e) { toast(e.message,'error'); }
+    const oldpw = document.getElementById('st-old').value;
+    const newpw = document.getElementById('st-new').value;
+    const newpw2 = document.getElementById('st-new2').value;
+    if (!newpw) { return toast('请输入新密码','error'); }
+    if (newpw !== newpw2) { return toast('两次输入的新密码不一致','error'); }
+    try { await api('/password',{method:'POST',body:{old_password:oldpw,new_password:newpw}}); document.getElementById('st-old').value=''; document.getElementById('st-new').value=''; document.getElementById('st-new2').value=''; toast('密码已更新','ok'); } catch(e) { toast(e.message,'error'); }
   };
   document.getElementById('toggle-dark').onclick = toggleDark;
   renderTotpSection();
@@ -1035,7 +1042,7 @@ async function renderAudit() {
     body.innerHTML = '<div class="space-y-2">' + items.map(a => {
       const cat = auditCat(a.action);
       const meta = AUDIT_META[cat] || AUDIT_META.system;
-      return `<div class="file-row fade-in">
+      return `<div class="audit-row fade-in">
         <div class="ficon" style="background:${meta.c}1a">${meta.e}</div>
         <div class="flex-1 min-w-0"><div class="flex items-center gap-2 truncate"><span class="text-[14px] font-semibold truncate">${esc(AUDIT_LABELS[a.action] || a.action)}</span><span class="chip shrink-0" style="background:${meta.c}14;color:${meta.c}">${esc(catLabel(cat))}</span>${a.detail ? `<span class="text-[12px] truncate" style="color:var(--text-3)">${esc(a.detail)}</span>` : ''}</div></div>
         <div class="text-[11px] shrink-0" style="color:var(--text-3)">${fmtDateTime(a.created_at)}</div>

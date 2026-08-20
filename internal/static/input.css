@@ -189,6 +189,9 @@
   .file-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
   .ficon { display: flex; align-items: center; justify-content: center; border-radius: 0.85rem; overflow: hidden; flex-shrink: 0; }
   .file-row .ficon { width: 2.9rem; height: 2.9rem; }
+  .audit-row { display: flex; align-items: center; gap: 0.55rem; padding: 0.38rem 0.65rem; border-radius: 0.8rem; background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow-soft); transition: transform 0.15s ease, box-shadow 0.2s ease; }
+  .audit-row:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+  .audit-row .ficon { width: 2.2rem; height: 2.2rem; font-size: 1rem; flex-shrink: 0; }
 
   .app-pw-key {
     display: inline-flex; align-items: center; justify-content: center;

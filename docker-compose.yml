@@ -8,11 +8,11 @@ services:
     ports:
       - "8080:8080"
     environment:
-      # Seed account (only used on first run with an empty database).
+      # Seed account default is admin/admin123 (baked into the binary); only
+      # override these if you need a different first-run account.
       - CHINASCLMDAV_SEED_USER=admin
       - CHINASCLMDAV_SEED_EMAIL=admin@qq.com
       - CHINASCLMDAV_SEED_NAME=admin
-      - CHINASCLMDAV_SEED_PASS=admin123
       - CHINASCLMDAV_PUBLIC_URL=http://localhost:8080
     volumes:
       - chinasclmdav-data:/data
